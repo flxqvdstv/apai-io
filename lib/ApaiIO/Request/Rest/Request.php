@@ -26,7 +26,7 @@ use ApaiIO\Request\Util;
 /**
  * Basic implementation of the rest request
  *
- * @see    http://docs.aws.amazon.com/AWSECommerceService/2011-08-01/DG/AnatomyOfaRESTRequest.html
+ * @see    http://docs.aws.amazon.com/AWSECommerceService/latest/DG/AnatomyOfaRESTRequest.html
  * @author Jan Eichhorn <exeu65@googlemail.com>
  */
 class Request implements RequestInterface
@@ -67,6 +67,29 @@ class Request implements RequestInterface
     const ENCODING = CURLOPT_ENCODING;
 
     /**
+     * FALSE to stop cURL from verifying the peer's certificate.
+     *
+     * DANGER: FALSE allows man in the middle (MITM) attacks.
+     *
+     * @var bool
+     */
+    const SSL_VERIFYPEER = CURLOPT_SSL_VERIFYPEER;
+
+    /**
+     * The name of a file holding one or more certificates to verify the peer with.
+     *
+     * @var string
+     */
+    const CAINFO  = CURLOPT_CAINFO;
+
+    /**
+     * A directory that holds multiple CA certificates.
+     *
+     * @var string
+     */
+    const CAPATH = CURLOPT_CAPATH;
+
+    /**
      * curl options
      *
      * @var array
@@ -78,7 +101,7 @@ class Request implements RequestInterface
      *
      * @var string
      */
-    protected $requestScheme = "http://webservices.amazon.%s/onca/xml?%s";
+    protected $requestScheme = "https://webservices.amazon.%s/onca/xml?%s";
 
     /**
      * @var ConfigurationInterface
@@ -92,12 +115,15 @@ class Request implements RequestInterface
      */
     public function __construct(array $options = array())
     {
+        $ca_trust = dirname(__FILE__).'/ca/ca-bundle.trust.crt';
         $this->options = array(
             self::USERAGENT          => "ApaiIO [" . ApaiIO::VERSION . "]",
             self::CONNECTION_TIMEOUT => 10,
             self::TIMEOUT            => 10,
             self::FOLLOW_LOCATION    => 1,
-            self::ENCODING           => ''
+            self::ENCODING           => '',
+            self::SSL_VERIFYPEER     => true,
+            self::CAINFO             => $ca_trust
         );
         $this->setOptions($options);
     }
